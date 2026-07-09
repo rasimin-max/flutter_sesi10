@@ -1,23 +1,24 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import '../pages/HomePage.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class AddUserPage extends StatefulWidget {
+  const AddUserPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<AddUserPage> createState() => _AddUserPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class _AddUserPageState extends State<AddUserPage> {
+  final username = TextEditingController();
   final email = TextEditingController();
   final password = TextEditingController();
 
-  Future<void> login() async {
+  Future<void> saveUser() async {
     final response = await http.post(
-      Uri.parse("http://192.168.0.109:8080/flutter_api/auth/login.php"),
+      Uri.parse("http://192.168.0.109:8080/flutter_api/user/add_user.php"),
       body: {
+        "username": username.text,
         "email": email.text,
         "password": password.text,
       },
@@ -28,14 +29,7 @@ class _LoginPageState extends State<LoginPage> {
     final data = jsonDecode(response.body);
 
     if (data["status"] == true) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => HomePage(
-            username: data["data"]["user"]["username"],
-          ),
-        ),
-      );
+      Navigator.pop(context, "Data user berhasil disimpan");
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -49,9 +43,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xffF5F7FB),
       appBar: AppBar(
-        title: const Text("Login"),
+        title: const Text("Tambah User"),
         backgroundColor: const Color(0xff4A43EC),
         foregroundColor: Colors.white,
       ),
@@ -59,6 +52,13 @@ class _LoginPageState extends State<LoginPage> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
+            TextField(
+              controller: username,
+              decoration: const InputDecoration(
+                labelText: "Username",
+              ),
+            ),
+            const SizedBox(height: 10),
             TextField(
               controller: email,
               decoration: const InputDecoration(
@@ -82,8 +82,14 @@ class _LoginPageState extends State<LoginPage> {
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 15),
                 ),
-                onPressed: login,
-                child: const Text("Login"),
+                onPressed: saveUser,
+                child: const Text(
+                  "Simpan",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
           ],
